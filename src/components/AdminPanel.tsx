@@ -106,6 +106,8 @@ const AdminPanel = () => {
     duration: string;
     featured: boolean;
     type: "surf" | "snowboard";
+    image?: string;
+    publicId?: string;
   }>({
     name: "",
     description: "",
@@ -113,6 +115,8 @@ const AdminPanel = () => {
     duration: "",
     featured: false,
     type: "surf",
+    image: "",
+    publicId: "",
   });
 
   // Review editing states
@@ -637,7 +641,9 @@ const AdminPanel = () => {
         duration: newPackage.duration.trim(),
         featured: newPackage.featured,
         image:
+          newPackage.image ||
           "https://images.unsplash.com/photo-1502680390469-be75c86b636f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+        publicId: newPackage.publicId || "",
         highlights: [
           "Nuevo paquete",
           "Experiencia única",
@@ -666,6 +672,8 @@ const AdminPanel = () => {
         duration: "",
         featured: false,
         type: "surf",
+        image: "",
+        publicId: "",
       });
       setShowAddPackageForm(false);
       showMessage("Paquete agregado exitosamente");
@@ -732,11 +740,34 @@ const AdminPanel = () => {
 
     setLoading(true);
     try {
+      // Find the package to get its publicId for Cloudinary deletion
+      const packages = type === "surf" ? surfPackages : snowboardPackages;
+      const packageToDelete = packages.find((pkg) => pkg.id === packageId);
+
       const collection =
         type === "surf"
           ? COLLECTIONS.SURF_PACKAGES
           : COLLECTIONS.SNOWBOARD_PACKAGES;
+
+      // Delete from Firebase first
       await FirebaseService.deleteDocument(collection, packageId.toString());
+
+      // If package has a Cloudinary publicId, delete from Cloudinary too
+      if (packageToDelete?.publicId) {
+        try {
+          await CloudinaryService.deleteImage(packageToDelete.publicId);
+          console.log(
+            "Package image deleted from Cloudinary:",
+            packageToDelete.publicId
+          );
+        } catch (cloudinaryError) {
+          console.warn(
+            "Failed to delete package image from Cloudinary:",
+            cloudinaryError
+          );
+          // Don't fail the entire operation if Cloudinary deletion fails
+        }
+      }
 
       if (type === "surf") {
         setSurfPackages(surfPackages.filter((pkg) => pkg.id !== packageId));

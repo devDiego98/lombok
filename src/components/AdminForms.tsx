@@ -22,6 +22,7 @@ import {
   Upload,
 } from "lucide-react";
 import { CloudinaryService } from "../services/cloudinaryService";
+import { PackageImageUpload } from "./PackageImageUpload";
 
 // Type definitions
 interface ModalProps {
@@ -39,6 +40,8 @@ interface NewPackage {
   duration: string;
   featured: boolean;
   type: "surf" | "snowboard";
+  image?: string;
+  publicId?: string;
 }
 
 interface AddPackageFormProps {
@@ -234,6 +237,21 @@ export const AddPackageForm: React.FC<AddPackageFormProps> = ({
         </div>
       </div>
 
+      <PackageImageUpload
+        currentImage={newPackage.image}
+        onImageUpload={(imageData) => {
+          setNewPackage({
+            ...newPackage,
+            image: imageData.src,
+            publicId: imageData.publicId,
+          });
+        }}
+        onImageRemove={() => {
+          setNewPackage({ ...newPackage, image: "", publicId: "" });
+        }}
+        packageType={newPackage.type}
+      />
+
       <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
         <button
           onClick={handleAddPackage}
@@ -253,6 +271,8 @@ export const AddPackageForm: React.FC<AddPackageFormProps> = ({
               duration: "",
               featured: false,
               type: "surf",
+              image: "",
+              publicId: "",
             });
           }}
           className="bg-gray-600 hover:bg-gray-700 text-white px-4 sm:px-6 py-2 rounded-lg flex items-center justify-center space-x-2 text-sm sm:text-base"
@@ -1988,11 +2008,13 @@ export const SponsorItem: React.FC<SponsorItemProps> = ({
 interface BasicPackageEditorProps {
   editData: any;
   setEditData: React.Dispatch<React.SetStateAction<any>>;
+  packageType: "surf" | "snowboard";
 }
 
 export const BasicPackageEditor: React.FC<BasicPackageEditorProps> = ({
   editData,
   setEditData,
+  packageType,
 }) => {
   const [newHighlight, setNewHighlight] = React.useState("");
   const [editingHighlightIndex, setEditingHighlightIndex] = React.useState<
@@ -2099,17 +2121,20 @@ export const BasicPackageEditor: React.FC<BasicPackageEditorProps> = ({
         </div>
       </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          URL de Imagen
-        </label>
-        <input
-          type="url"
-          value={editData.image}
-          onChange={(e) => setEditData({ ...editData, image: e.target.value })}
-          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-        />
-      </div>
+      <PackageImageUpload
+        currentImage={editData.image}
+        onImageUpload={(imageData) => {
+          setEditData({
+            ...editData,
+            image: imageData.src,
+            publicId: imageData.publicId,
+          });
+        }}
+        onImageRemove={() => {
+          setEditData({ ...editData, image: "", publicId: "" });
+        }}
+        packageType={packageType}
+      />
 
       <div className="flex items-center">
         <input
@@ -2265,7 +2290,11 @@ export const BasicPackageEditModal: React.FC<BasicPackageEditModalProps> = ({
       size="lg"
     >
       <div className="p-6">
-        <BasicPackageEditor editData={editData} setEditData={setEditData} />
+        <BasicPackageEditor
+          editData={editData}
+          setEditData={setEditData}
+          packageType={type as "surf" | "snowboard"}
+        />
       </div>
       <div className="flex justify-end space-x-3 p-6 border-t border-gray-200 bg-gray-50">
         <button

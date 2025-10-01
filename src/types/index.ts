@@ -185,6 +185,7 @@ export interface Package extends BaseDocument {
   dateRanges?: DateRange[];
   adventureType?: "surf" | "snowboard";
   image?: string;
+  publicId?: string; // Cloudinary public ID for image management
   duration?: string;
   highlights?: string[];
   details?: Record<string, Record<string, string>>;
