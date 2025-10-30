@@ -22,6 +22,7 @@ const Footer = () => {
     { name: "Reseñas", href: "#reviews" },
     { name: "FAQ", href: "#faq" },
     { name: "Contacto", href: "#contact" },
+    { name: "Privacidad", href: "/privacidad" },
   ];
 
   const adventures = [

@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
 import { usePreloadedNavigationData } from "../contexts/DataContext";
+import { useNavigate } from "react-router-dom";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-
+  const navigate = useNavigate();
   // Get preloaded navigation data from context
   const { data: navigationData, error } = usePreloadedNavigationData();
 
@@ -20,23 +21,53 @@ const Header = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const handleSmoothScroll = (
+  // Handle scrolling after navigation
+  useEffect(() => {
+    const hash = location.hash;
+    if (hash) {
+      // Small delay to ensure page is rendered
+      setTimeout(() => {
+        const targetId = hash.replace("#", "");
+        const targetElement = document.getElementById(targetId);
+        if (targetElement) {
+          const headerHeight = 80;
+          const elementPosition = targetElement.getBoundingClientRect().top;
+          const offsetPosition =
+            elementPosition + window.scrollY - headerHeight;
+          window.scrollTo({
+            top: offsetPosition,
+            behavior: "smooth",
+          });
+        }
+      }, 100);
+    }
+  }, [location]);
+
+  const handleNavClick = (
     e: React.MouseEvent<HTMLAnchorElement>,
     href: string
   ): void => {
     e.preventDefault();
-    const targetId = href.replace("#", "");
-    const targetElement = document.getElementById(targetId);
 
-    if (targetElement) {
-      const headerHeight = 80; // Approximate header height
-      const elementPosition = targetElement.getBoundingClientRect().top;
-      const offsetPosition = elementPosition + window.scrollY - headerHeight;
-
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: "smooth",
-      });
+    // If we're not on the home page and clicking a hash link, navigate to home first
+    if (location.pathname !== "/" && href.startsWith("#")) {
+      navigate(`/${href}`, { replace: false });
+    } else if (location.pathname === "/" && href.startsWith("#")) {
+      // Already on home page, just scroll
+      const targetId = href.replace("#", "");
+      const targetElement = document.getElementById(targetId);
+      if (targetElement) {
+        const headerHeight = 80;
+        const elementPosition = targetElement.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.scrollY - headerHeight;
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: "smooth",
+        });
+      }
+    } else if (!href.startsWith("#")) {
+      // Regular navigation for non-hash links (full paths)
+      navigate(href);
     }
 
     // Close mobile menu if open
@@ -84,7 +115,7 @@ const Header = () => {
               <a
                 key={item.name}
                 href={item.href}
-                onClick={(e) => handleSmoothScroll(e, item.href)}
+                onClick={(e) => handleNavClick(e, item.href)}
                 className={`font-medium transition-colors hover:text-primary-600 cursor-pointer ${
                   isScrolled ? "text-gray-700" : "text-white"
                 }`}
@@ -98,7 +129,7 @@ const Header = () => {
           <div className="hidden md:block">
             <a
               href="#contact"
-              onClick={(e) => handleSmoothScroll(e, "#contact")}
+              onClick={(e) => handleNavClick(e, "#contact")}
               className="btn-primary cursor-pointer"
             >
               Reservar Ahora
@@ -130,7 +161,7 @@ const Header = () => {
                 <a
                   key={item.name}
                   href={item.href}
-                  onClick={(e) => handleSmoothScroll(e, item.href)}
+                  onClick={(e) => handleNavClick(e, item.href)}
                   className="block px-4 py-2 text-gray-700 hover:bg-gray-50 hover:text-primary-600 transition-colors cursor-pointer"
                 >
                   {item.name}
@@ -139,7 +170,7 @@ const Header = () => {
               <div className="px-4 pt-2">
                 <a
                   href="#contact"
-                  onClick={(e) => handleSmoothScroll(e, "#contact")}
+                  onClick={(e) => handleNavClick(e, "#contact")}
                   className="btn-primary w-full text-center block cursor-pointer"
                 >
                   Reservar Ahora

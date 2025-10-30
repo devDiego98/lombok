@@ -2,6 +2,7 @@ import { Routes, Route, useLocation } from "react-router-dom";
 import HomePage from "./pages/HomePage";
 import SnowboardTrip from "./pages/SnowboardTrip";
 import SurfTrip from "./pages/SurfTrip";
+import Privacidad from "./pages/Privacidad";
 import AdminPanel from "./components/AdminPanel";
 import ProtectedRoute from "./components/ProtectedRoute";
 import LombokLoader from "./components/LombokLoader";
@@ -36,6 +37,7 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/snowboard" element={<SnowboardTrip />} />
           <Route path="/surf" element={<SurfTrip />} />
+          <Route path="/privacidad" element={<Privacidad />} />
           <Route
             path="/admin"
             element={
