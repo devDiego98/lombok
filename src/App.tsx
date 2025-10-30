@@ -19,7 +19,17 @@ function App() {
   console.log("Current route:", location.pathname);
 
   // Show global loader while loading all Firebase data
-  if (loading) {
+  // Only show loader if loading is true AND we don't have any data yet
+  const hasData = data && Object.keys(data).length > 0;
+  console.log("[App] Render check:", {
+    loading,
+    hasData,
+    dataKeys: data ? Object.keys(data).length : 0,
+    location: location.pathname,
+    willShowLoader: loading && !hasData,
+  });
+  if (loading && !hasData) {
+    console.log("[App] ⚠️ SHOWING LOADER");
     return (
       <LombokLoader
         progress={progress}
